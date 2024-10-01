@@ -16,7 +16,7 @@ services:
   mysqldb:
     image: mysql:5.7
     restart: unless-stopped
-    env_file: ./.orbit.env
+    env_file: ./.corega.env
     command: [ "mysqld", "--default-authentication-plugin=mysql_native_password" ]
     environment:
       - MYSQL_ROOT_HOST=%

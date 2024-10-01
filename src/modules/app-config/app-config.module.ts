@@ -38,7 +38,7 @@ export class AppConfigModule {
     };
     return {
       module: AppConfigModule,
-      imports: [ConfigModule.forRoot({ envFilePath: '.orbit.env', isGlobal: true, ...options })],
+      imports: [ConfigModule.forRoot({ envFilePath: '.corega.env', isGlobal: true, ...options })],
       providers: [ConfigProvider],
       exports: [ConfigModule],
     };
