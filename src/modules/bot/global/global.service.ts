@@ -109,7 +109,7 @@ export class globalService {
       cardNumber: string;
     },
   ) {
-    const user = await this.em.findOneOrFail(User, { chatId: String(from) });
+    const user = await this.em.findOneOrFail(User, { chatId: String(from) }, { populate: ['checks'] });
     return await this.insertNewCheck(user, payload);
   }
   async insertNewCheck(
