@@ -71,24 +71,24 @@ export const composeMyTicketMessage = (ctx: BotContext): string => {
   const content =
     `${ctx.i18n.t(LOCALES.ticket_object)}: ${currentTicket.object}\n` +
     `${ctx.i18n.t(LOCALES.ticket_date)}: ${new Date(currentTicket.createdAt).toLocaleString()}\n` +
-    `${ctx.i18n.t(LOCALES.ticket_status)}: ${ctx.i18n.t(currentTicket.status as any)}\n` +
+    `${ctx.i18n.t(LOCALES.ticket_status)}: ${ctx.i18n.t(currentTicket.status as LOCALES)}\n` +
     `${lastmessage ? ctx.i18n.t(LOCALES.ticket_last_message) + '\n' + `[${new Date(lastmessage.createdAt).toLocaleString()}] ${lastmessage.user}: ${lastmessage.message}\n` : ''}\n`;
   const total = `(${ticketNum + 1}/${ctx.session.userData.tickets.data.length})`;
   const message = `${total}\n\n` + content;
   return message;
 };
 
-export const prizeMessage = (ctx: BotContext, lotteries: Lottery[]): string => {
-  if (!lotteries.length) return ctx.i18n.t(LOCALES.no_prizes);
-  const locale = ctx.i18n.locale() as Locale;
-  const message = lotteries.reduce((s: string, c: Lottery) => {
-    c.winners.toArray().forEach((w) => {
-      s += `\n${w.check.fancyId} - ${c.prize.translation.getLocalizedLabel(locale)}`;
-    });
-    return s;
-  }, ctx.i18n.t(LOCALES.my_prizes));
-  return message;
-};
+// export const prizeMessage = (ctx: BotContext, lotteries: Lottery[]): string => {
+//   if (!lotteries.length) return ctx.i18n.t(LOCALES.no_prizes);
+//   const locale = ctx.i18n.locale() as Locale;
+//   const message = lotteries.reduce((s: string, c: Lottery) => {
+//     c.winners.toArray().forEach((w) => {
+//       s += `\n${w.check.fancyId} - ${c.prize.translation.getLocalizedLabel(locale)}`;
+//     });
+//     return s;
+//   }, ctx.i18n.t(LOCALES.my_prizes));
+//   return message;
+// };
 
 // export const winnersMessage = (ctx: BotContext): string => {
 //   return ctx.session.winners.length ? ctx.i18n.t(LOCALES.winners) : ctx.i18n.t(LOCALES.no_winners_yet);

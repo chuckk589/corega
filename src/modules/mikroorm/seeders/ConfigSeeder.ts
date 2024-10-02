@@ -20,30 +20,26 @@ export class ConfigSeeder extends Seeder {
       name: 'BOT_TOKEN_PROD',
       value: '1863509702:AAGBObPLJYd17777K26x0s1vsG8fva3NCag',
     });
-    em.create(Config, {
-      name: 'PROMO_END_DATE',
-      value: '11-31-2024',
-    });
     em.create(User, {
       username: 'admin',
       chatId: '123456789',
       role: UserRole.ADMIN,
     });
     let translationId = 1;
-    for (let i = 0; i < promos.length; i++) {
-      em.create(Promo, {
-        name: 'PROMO_' + (i + 1),
-        translation: em.create(Translation, {
-          id: translationId,
-          name: 'PROMO_' + (i + 1),
-          values: [
-            { code: Locale.RU, value: promos[i].ru, translation: translationId },
-            { code: Locale.UZ, value: promos[i].uz, translation: translationId },
-          ],
-        }),
-      });
-      translationId++;
-    }
+    // for (let i = 0; i < promos.length; i++) {
+    //   em.create(Promo, {
+    //     name: 'PROMO_' + (i + 1),
+    //     translation: em.create(Translation, {
+    //       id: translationId,
+    //       name: 'PROMO_' + (i + 1),
+    //       values: [
+    //         { code: Locale.RU, value: promos[i].ru, translation: translationId },
+    //         { code: Locale.UZ, value: promos[i].uz, translation: translationId },
+    //       ],
+    //     }),
+    //   });
+    //   translationId++;
+    // }
 
     for (let i = 0; i < cities.length; i++) {
       em.create(City, {
@@ -65,7 +61,7 @@ export class ConfigSeeder extends Seeder {
       name: 'REJECTED',
       values: [
         { code: Locale.RU, value: 'Отклонен' },
-        { code: Locale.UZ, value: 'Ауытқу' },
+        { code: Locale.UZ, value: 'Rad etilgan' },
       ],
     });
     translationId++;
@@ -145,29 +141,28 @@ export class ConfigSeeder extends Seeder {
   }
 }
 
-const promos = [
-  { ru: '* Увидел(-а) в рекламе', uz: '* Жарнамадан көрдім' },
-  { ru: '* От продавца в магазине', uz: '* Дүкендегі сатушыдан' },
-  { ru: '* TV', uz: '* TV' },
-  { ru: '* другое', uz: '* басқа' },
-];
+// const promos = [
+//   { ru: '* Увидел(-а) в рекламе', uz: '* Жарнамадан көрдім' },
+//   { ru: '* От продавца в магазине', uz: '* Дүкендегі сатушыдан' },
+//   { ru: '* TV', uz: '* TV' },
+//   { ru: '* другое', uz: '* басқа' },
+// ];
 
 const cities = [
-  { ru: 'Алматы', uz: 'Алматы' },
-  { ru: 'Астана', uz: 'Астана' },
-  { ru: 'Шымкент', uz: 'Шымкент' },
-  { ru: 'Тараз', uz: 'Тараз' },
-  { ru: 'Актау', uz: 'Ақтау' },
-  { ru: 'Атырау', uz: 'Атырау' },
-  { ru: 'Караганда', uz: 'Қарағанды' },
-  { ru: 'Семей', uz: 'Семей' },
-  { ru: 'Петропавловск', uz: 'Петропавл' },
-  { ru: 'Кызылорда', uz: 'Қызылорда' },
-  { ru: 'Павлодар', uz: 'Павлодар' },
-  { ru: 'Туркестан', uz: 'Түркістан' },
-  { ru: 'Уральск', uz: 'Орал' },
-  { ru: 'Усть-Каменогорск', uz: 'Өскемен' },
-  { ru: 'Другое', uz: 'басқа' },
+  { ru: 'Ташкент', uz: 'Toshkent' },
+  { ru: 'Андижан', uz: 'Andijon' },
+  { ru: 'Бухара', uz: 'Buxoro' },
+  { ru: 'Гулистан', uz: 'Guliston' },
+  { ru: 'Джизак', uz: 'Jizzax' },
+  { ru: 'Карши', uz: 'Qarshi' },
+  { ru: 'Навои', uz: 'Navoiy' },
+  { ru: 'Наманган', uz: 'Namangan' },
+  { ru: 'Нукус', uz: 'Nukus' },
+  { ru: 'Самарканд', uz: 'Samarqand' },
+  { ru: 'Термез', uz: 'Termiz' },
+  { ru: 'Ургенч', uz: 'Urganch' },
+  { ru: 'Фергана', uz: "Farg'ona" },
+  { ru: 'Другое', uz: 'Boshqalar' },
 ];
 
 const checkstatuses = [

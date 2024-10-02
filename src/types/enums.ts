@@ -6,7 +6,9 @@ export enum BotStep {
   resident = 'resident',
   name = 'name',
   city = 'city',
-
+  faq = 'faq',
+  faq1 = 'faq1',
+  faq2 = 'faq2',
   //participate
   pStep1 = 'pStep1',
   pStep2 = 'pStep2',
