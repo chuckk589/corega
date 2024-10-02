@@ -55,7 +55,6 @@ function checkLocalesKeys() {
   // if (extraKeys.length) {
   //   console.log('Extra keys json:', extraKeys);
   // }
-
   //camelcase to underscore
   // const camelCaseKeys = keys.filter((key) => !key.includes('_'));
   // const rest = keys.filter((key) => key.includes('_'));
@@ -68,7 +67,6 @@ function checkLocalesKeys() {
   //   noCamelCaseKeys[key] = ruLocale[key];
   // });
   // fs.writeFileSync(path.resolve(__dirname, '../bot/locales/_ru.json'), JSON.stringify(noCamelCaseKeys, null, 2));
-
   //sort keys aplhabetically but parse numbers as numbers
   // const sortedKeys = keys.sort((a, b) => {
   //   const aNum = parseInt(a.match(/\d+/)?.[0]);
@@ -89,11 +87,6 @@ function checkLocalesKeys() {
   //     2,
   //   ),
   // );
-
-  const keys = Object.keys(JSON.parse(fs.readFileSync(path.resolve(__dirname, '../bot/locales/uz.json'), 'utf-8')));
-  const keys2 = Object.keys(JSON.parse(fs.readFileSync(path.resolve(__dirname, '../bot/locales/_uz.json'), 'utf-8')));
-  const overlappingKeys = keys.filter((key) => keys2.includes(key));
-  console.log('Overlapping keys:', overlappingKeys);
   // const oldKeys = Object.keys(locale);
   // const camelCaseKeys = oldKeys.filter((key) => !key.includes('_'));
   // const rest = oldKeys.filter((key) => key.includes('_'));
