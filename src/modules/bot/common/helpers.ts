@@ -37,32 +37,19 @@ export const label = (payload: { text: LOCALES; payload?: string }) => {
 //   return message;
 // };
 
-// export const accountMessage = (ctx: BotContext, checks: Check[]): string => {
-//   const locale = ctx.i18n.locale() as Locale;
-//   let message = ctx.i18n.t(LOCALES.my_checks);
-//   if (!checks.length) {
-//     message += '\n' + ctx.i18n.t(LOCALES.no_checks) + '\n' + ctx.i18n.t(LOCALES.my_prizes) + '\n' + ctx.i18n.t(LOCALES.no_prizes);
-//     return message;
-//   }
-//   checks.forEach((c) => {
-//     message += `\n${c.fancyId} - ${c.status.comment ? c.status.comment.getLocalizedLabel(locale) : c.status.translation.getLocalizedLabel(locale)}`;
-//   });
-//   message += '\n' + ctx.i18n.t(LOCALES.my_prizes);
+export const accountMessage = (ctx: BotContext, checks: Check[]): string => {
+  const locale = ctx.i18n.locale() as Locale;
+  let message = ctx.i18n.t(LOCALES.my_applies);
+  if (!checks.length) {
+    message += '\n' + ctx.i18n.t(LOCALES.no_applies);
+    return message;
+  }
+  checks.forEach((c) => {
+    message += `\n${c.fancyId} - ${c.status.comment ? c.status.comment.getLocalizedLabel(locale) : c.status.translation.getLocalizedLabel(locale)}`;
+  });
 
-//   let won = false;
-//   checks.forEach((c) => {
-//     const winners = c.winners.getItems();
-//     if (winners.length) {
-//       won = true;
-//       winners.forEach((w) => {
-//         message += `\n${w.check.fancyId} - ${ctx.i18n.t(w.prizeValue.name)}`;
-//       });
-//     }
-//   });
-//   if (!won) message += '\n' + ctx.i18n.t(LOCALES.no_prizes);
-
-//   return message;
-// };
+  return message;
+};
 
 export const composeMyTicketMessage = (ctx: BotContext): string => {
   const ticketNum = ctx.session.userData.tickets.currentIndex;

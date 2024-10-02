@@ -4,7 +4,7 @@ import { UserGender, Locale } from 'src/modules/mikroorm/entities/User';
 import { BotStep } from 'src/types/enums';
 import { BaseComposer, BotContext } from 'src/types/interfaces';
 import { Command, ComposerController, On, Use } from '../common/decorators';
-import { label } from '../common/helpers';
+import { accountMessage, composeMyTicketMessage, label } from '../common/helpers';
 import { globalService } from './global.service';
 import { Router } from '@grammyjs/router';
 import { AppConfigService } from 'src/modules/app-config/app-config.service';
@@ -13,6 +13,8 @@ import i18n from '../middleware/i18n';
 import cache from '../common/cache';
 import { LOCALES } from '../common/constants';
 import { FAQ1_QUESTION_AMOUNT, FAQ2_QUESTION_AMOUNT } from 'src/constants';
+import { TicketStatus } from 'src/modules/mikroorm/entities/Ticket';
+import { TicketService } from 'src/modules/ticket/ticket.service';
 // import { AccountComposer } from '../account/account.composer';
 
 @ComposerController
@@ -21,9 +23,73 @@ export class globalComposer extends BaseComposer {
     // private readonly accountService: AccountService,
     private readonly globalService: globalService,
     private readonly AppConfigService: AppConfigService,
+    private readonly ticketService: TicketService,
   ) {
     super();
   }
+  @Use(undefined, 'filter')
+  tickets = new Menu<BotContext>('ticket-menu').dynamic((ctx, range) => {
+    const ticket = ctx.currentTicket;
+    switch (ctx.session.step) {
+      case BotStep.tickets: {
+        range.text(label({ text: LOCALES.my_tickets }), async (ctx) => {
+          const tickets = await this.ticketService.findAll({ user: { chatId: ctx.from.id.toString() } });
+          if (tickets.length == 0) {
+            await ctx.answerCallbackQuery({ text: ctx.i18n.t(LOCALES.no_tickets), show_alert: true });
+            return;
+          }
+          ctx.session.step = BotStep.ticketsEdit;
+          ctx.session.userData.tickets.data = tickets;
+          ctx.session.userData.tickets.currentIndex = 0;
+          await ctx.editMessageText(composeMyTicketMessage(ctx));
+        });
+        range.text(label({ text: LOCALES.new_ticket }), async (ctx) => {
+          ctx.session.step = BotStep.ticketsCreate;
+          await ctx.editMessageText(ctx.i18n.t(LOCALES.create_ticket_content));
+        });
+        break;
+      }
+      case BotStep.ticketsEdit: {
+        range.text(label({ text: LOCALES.get_ticket_content }), async (ctx) => {
+          if (ticket.history.length == 0) {
+            await ctx.answerCallbackQuery({ text: ctx.i18n.t(LOCALES.no_messages), show_alert: true });
+            return;
+          }
+          const message = ticket.history.map((h) => `[${new Date(h.createdAt).toLocaleString()}] ${h.user}: ${h.message}\n`).join('');
+          await ctx.reply(message);
+        });
+        if (ticket.status != TicketStatus.CLOSED) {
+          range.text(label({ text: LOCALES.add_ticket_reply }), async (ctx) => {
+            ctx.session.step = BotStep.ticketsReply;
+            await ctx.reply(ctx.i18n.t(LOCALES.add_ticket_reply_content));
+          });
+        }
+        range.row();
+        range.text(label({ text: LOCALES.cancel }), async (ctx) => {
+          ctx.session.step = BotStep.tickets;
+          await ctx.editMessageText(ctx.i18n.t(LOCALES.helpDetails));
+        });
+        range.text(label({ text: LOCALES.prev_ticket }), async (ctx) => {
+          if (ctx.session.userData.tickets.data.length <= 1) return;
+          ctx.setPrevTicket();
+          await ctx.editMessageText(composeMyTicketMessage(ctx));
+        });
+        range.text(label({ text: LOCALES.next_ticket }), async (ctx) => {
+          if (ctx.session.userData.tickets.data.length <= 1) return;
+          ctx.setNextTicket();
+          await ctx.editMessageText(composeMyTicketMessage(ctx));
+        });
+        break;
+      }
+      case BotStep.ticketsCreate: {
+        range.text(label({ text: LOCALES.cancel }), async (ctx) => {
+          ctx.session.step = BotStep.tickets;
+          await ctx.editMessageText(ctx.i18n.t(LOCALES.helpDetails));
+        });
+        break;
+      }
+    }
+  });
   @Use()
   validateMenu = new Menu<BotContext>('validate-menu').dynamic((ctx, range) => {
     switch (ctx.session.step) {
@@ -109,7 +175,8 @@ export class globalComposer extends BaseComposer {
         });
         range.row();
         range.text(label({ text: LOCALES.account }), async (ctx) => {
-          await ctx.reply(ctx.i18n.t(LOCALES.account));
+          const checks = await this.globalService.getUserAccountInfo(ctx);
+          await ctx.reply(accountMessage(ctx, checks));
         });
         range.row();
         range.text(label({ text: LOCALES.products }), async (ctx) => {
@@ -122,7 +189,10 @@ export class globalComposer extends BaseComposer {
         });
         range.row();
         range.text(label({ text: LOCALES.contacts }), async (ctx) => {
-          await ctx.reply(ctx.i18n.t(LOCALES.contacts_details));
+          // await ctx.reply(ctx.i18n.t(LOCALES.contacts_details));
+          ctx.session.step = BotStep.tickets;
+          ctx.session.userData.tickets.data = await this.ticketService.findAll({ user: { chatId: ctx.from.id.toString() } });
+          await ctx.reply(ctx.i18n.t(LOCALES.helpDetails), { reply_markup: this.tickets });
         });
         break;
       }
@@ -136,7 +206,7 @@ export class globalComposer extends BaseComposer {
         range
           .text(label({ text: LOCALES.promo_questions }), async (ctx) => {
             ctx.session.step = BotStep.faq2;
-            await ctx.editMessageCaption({ caption: ctx.i18n.t(LOCALES.product_questions) });
+            await ctx.editMessageCaption({ caption: ctx.i18n.t(LOCALES.promo_questions) });
           })
           .row();
         range.text(label({ text: LOCALES.back }), async (ctx) => {
@@ -145,8 +215,8 @@ export class globalComposer extends BaseComposer {
         });
         break;
       }
-      case BotStep.faq1: {
-        const questionKeys = Array.from({ length: FAQ1_QUESTION_AMOUNT }, (_, idx) => {
+      case BotStep.faq2: {
+        const questionKeys = Array.from({ length: FAQ2_QUESTION_AMOUNT }, (_, idx) => {
           return 'question_' + (idx + 1);
         });
         for (const key of questionKeys) {
@@ -161,8 +231,8 @@ export class globalComposer extends BaseComposer {
         });
         break;
       }
-      case BotStep.faq2: {
-        const questionKeys = Array.from({ length: FAQ2_QUESTION_AMOUNT }, (_, idx) => {
+      case BotStep.faq1: {
+        const questionKeys = Array.from({ length: FAQ1_QUESTION_AMOUNT }, (_, idx) => {
           return 'question_' + (idx + 1) + 'p';
         });
         for (const key of questionKeys) {
@@ -314,6 +384,23 @@ export class globalComposer extends BaseComposer {
       // await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
       // await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
       await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+    })
+    .route(BotStep.ticketsReply, async (ctx: BotContext) => {
+      if (ctx.message) {
+        await this.ticketService.update(+ctx.currentTicket.id, {
+          response: ctx.message.text,
+          chatId: ctx.from.id,
+        });
+        ctx.session.step = BotStep.ticketsEdit;
+        await ctx.reply(ctx.i18n.t(LOCALES.ticket_reply_added));
+      }
+    })
+    .route(BotStep.ticketsCreate, async (ctx: BotContext) => {
+      if (ctx.message) {
+        await this.ticketService.create({ object: ctx.message.text, chatId: ctx.from.id.toString() });
+        ctx.session.step = BotStep.default;
+        await ctx.reply(ctx.i18n.t(LOCALES.ticket_created));
+      }
     });
 
   @On(':photo')

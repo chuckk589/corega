@@ -1,2 +1,2 @@
-ssh ubuntu@77.240.38.113 'sudo docker cp orbit-app-1:/app/dist/modules/bot/locales ./; exit'
-scp -r ubuntu@77.240.38.113:/home/ubuntu/locales "c:\programs\projects\nutella"
+ssh root@df01f2645aa7.vps.myjino.ru -p 49405 'sudo docker cp corega-app-1:/app/dist/modules/bot/locales ./; exit'
+scp -P 49405 -r root@df01f2645aa7.vps.myjino.ru:/root/locales  "c:\programs\projects\corega"

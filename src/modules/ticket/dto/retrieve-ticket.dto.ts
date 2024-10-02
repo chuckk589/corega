@@ -15,6 +15,6 @@ export class RetrieveTicketDto {
   username: string;
   object: string;
   history: { message: string; createdAt: Date; user: string }[];
-  status: 'pending' | 'closed';
+  status: 'pending' | 'closed' | 'answered';
   createdAt: Date;
 }

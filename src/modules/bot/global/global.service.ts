@@ -112,6 +112,17 @@ export class globalService {
     const user = await this.em.findOneOrFail(User, { chatId: String(from) }, { populate: ['checks'] });
     return await this.insertNewCheck(user, payload);
   }
+  async getUserAccountInfo(ctx: BotContext): Promise<Check[]> {
+    const userChecks = await this.em.find(
+      Check,
+      { user: { chatId: String(ctx.from.id) } },
+      {
+        refresh: true,
+        populate: ['status.comment.values', 'status.translation.values'],
+      },
+    );
+    return userChecks;
+  }
   async insertNewCheck(
     user: User,
     payload: {

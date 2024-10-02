@@ -5,6 +5,7 @@ import { TicketMessage } from './TicketMessage';
 
 export enum TicketStatus {
   PENDING = 'pending',
+  ANSWERED = 'answered',
   CLOSED = 'closed',
 }
 

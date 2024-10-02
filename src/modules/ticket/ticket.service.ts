@@ -9,6 +9,8 @@ import { RetrieveTicketDto } from './dto/retrieve-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { User } from '../mikroorm/entities/User';
 import { TicketMessage } from '../mikroorm/entities/TicketMessage';
+import i18n from '../bot/middleware/i18n';
+import { LOCALES } from '../bot/common/constants';
 
 @Injectable()
 export class TicketService {
@@ -31,9 +33,8 @@ export class TicketService {
     updateTicketDto.status ? (ticket.status = updateTicketDto.status as TicketStatus) : null;
     updateTicketDto.response ? ticket.messages.add(this.em.create(TicketMessage, { message: updateTicketDto.response, user: author })) : null;
     await this.em.persistAndFlush(ticket);
-    if (updateTicketDto.status == TicketStatus.CLOSED) {
-      const message = `Ваша заявка №${ticket.id} была обработана.\n\n${updateTicketDto.response}`;
-      this.bot.api.sendMessage(ticket.user.chatId, message || '');
+    if (updateTicketDto.status == TicketStatus.CLOSED || updateTicketDto.status == TicketStatus.ANSWERED) {
+      this.bot.api.sendMessage(ticket.user.chatId, i18n.t(ticket.user.locale, LOCALES.ticket_processed, { ticketId: ticket.id, response: updateTicketDto.response }));
     }
     return new RetrieveTicketDto(ticket);
   }

@@ -3,12 +3,6 @@ import { CustomBaseEntity } from './CustomBaseEntity';
 import { User } from './User';
 import { Ticket } from './Ticket';
 
-export enum TicketStatus {
-  PENDING = 'pending',
-  ANSWERED = 'answered',
-  CLOSED = 'closed',
-}
-
 @Entity()
 export class TicketMessage extends CustomBaseEntity {
   @PrimaryKey()
