@@ -44,10 +44,20 @@ export const accountMessage = (ctx: BotContext, checks: Check[]): string => {
     message += '\n' + ctx.i18n.t(LOCALES.no_applies);
     return message;
   }
-  checks.forEach((c) => {
-    message += `\n${c.fancyId} - ${c.status.comment ? c.status.comment.getLocalizedLabel(locale) : c.status.translation.getLocalizedLabel(locale)}`;
+  checks
+    .filter((c) => c.status.name != CheckState.APPROVED)
+    .forEach((c) => {
+      message += `\n${c.fancyId} - ${c.status.translation.getLocalizedLabel(locale)}`;
+    });
+  message += '\n\n' + ctx.i18n.t(LOCALES.my_refunds);
+  const approved = checks.filter((c) => c.status.name == CheckState.APPROVED);
+  if (!approved.length) {
+    message += '\n' + ctx.i18n.t(LOCALES.no_refunds);
+    return message;
+  }
+  approved.forEach((c) => {
+    message += `\n${c.fancyId} - ${c.status.translation.getLocalizedLabel(locale)}`;
   });
-
   return message;
 };
 

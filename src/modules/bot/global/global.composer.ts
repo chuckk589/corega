@@ -157,6 +157,11 @@ export class globalComposer extends BaseComposer {
     switch (ctx.session.step) {
       case BotStep.default: {
         range.text(label({ text: LOCALES.participate }), async (ctx) => {
+          const alreadyParticipated = await this.globalService.checkParticipation(ctx.from.id);
+          if (alreadyParticipated) {
+            await ctx.reply(ctx.i18n.t(LOCALES.already_participated));
+            return;
+          }
           ctx.session.step = BotStep.pStep1;
           await ctx.reply(ctx.i18n.t(LOCALES.participate_details));
         });
@@ -171,7 +176,8 @@ export class globalComposer extends BaseComposer {
         });
         range.row();
         range.text(label({ text: LOCALES.about }), async (ctx) => {
-          await ctx.reply(ctx.i18n.t(LOCALES.about_details));
+          const msg = await ctx.replyWithPhoto(cache.resolveAsset('about'), { caption: ctx.i18n.t(LOCALES.about_details) });
+          cache.cacheAsset('about', msg);
         });
         range.row();
         range.text(label({ text: LOCALES.account }), async (ctx) => {
@@ -317,8 +323,8 @@ export class globalComposer extends BaseComposer {
             ctx.menu.close();
             await this.globalService.finishRegistration(ctx);
             // await ctx.reply(ctx.i18n.t(LOCALES.registered), { reply_markup: mainKeyboard(ctx) });
-            const msg = await ctx.replyWithPhoto(cache.resolveAsset('about_' + ctx.i18n.locale()), { reply_markup: this.mMenu });
-            cache.cacheAsset('about_' + ctx.i18n.locale(), msg);
+            const msg = await ctx.replyWithPhoto(cache.resolveAsset('about'), { reply_markup: this.mMenu });
+            cache.cacheAsset('about', msg);
           }),
             index % 3 === 0 && range.row();
         });

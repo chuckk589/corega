@@ -9,11 +9,15 @@ import { BotContext, CheckData } from 'src/types/interfaces';
 import fs from 'fs';
 import axios from 'axios';
 import { Check } from 'src/modules/mikroorm/entities/Check';
+import { CheckState } from 'src/modules/mikroorm/entities/CheckStatus';
 
 @Injectable()
 export class globalService {
   constructor(private readonly em: EntityManager, private readonly AppConfigService: AppConfigService) {}
-
+  async checkParticipation(id: number) {
+    const checks = await this.em.find(Check, { user: { chatId: id.toString() }, status: { name: CheckState.APPROVED } });
+    return checks.length > 0;
+  }
   async clean(from: number) {
     const user = await this.em.findOneOrFail(User, { chatId: String(from) }, { populate: ['checks', 'tickets.messages'] });
     await this.em.removeAndFlush(user);
