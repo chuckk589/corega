@@ -9,6 +9,7 @@ import { CheckState, CheckStatus } from '../mikroorm/entities/CheckStatus';
 import { User } from '../mikroorm/entities/User';
 import { RetrieveCheckDto } from './dto/retrieve-check.dto';
 import { UpdateCheckDto } from './dto/update-check.dto';
+import { LOCALES } from '../bot/common/constants';
 
 export type ImportedCheck = {
   timestamp: string;
@@ -95,7 +96,7 @@ export class CheckService {
     const check_status = await this.em.findOneOrFail(CheckStatus, { id: Number(updateCheckDto.status) }, { populate: ['comment', 'translation'] });
     let message: string;
     if (check_status.name == CheckState.REJECTED) {
-      message = i18n.t(check.user.locale, check_status.translation.name, { check_id: check.fancyId });
+      message = i18n.t(check.user.locale, LOCALES.REJECT_REASON, { reason: i18n.t(check.user.locale, check_status.translation.name) });
     } else if (check_status.name == CheckState.APPROVED) {
       message = i18n.t(check.user.locale, check_status.translation.name, {
         check_id: check.fancyId,

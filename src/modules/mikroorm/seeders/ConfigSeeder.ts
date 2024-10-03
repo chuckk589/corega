@@ -164,13 +164,62 @@ const cities = [
   { ru: 'Фергана', uz: "Farg'ona" },
   { ru: 'Другое', uz: 'Boshqalar' },
 ];
-
+// Нечеткие изображения
+// Нечеткая фотография чека
+// Нечеткая фотография товара
+// Нечеткая фотография удостоверения
+// Неверные банковские данные
+// Неверный ПИНФЛ
+//ФИО в удостоверении не соответствует ФИО банковской карты
+//Пользователю был одобрен возврат ранее (повторный возврат средств невозможен)
 const checkstatuses = [
   { ru: 'Ожидает проверки', uz: 'Қарауды күтуде', key: 'MODERATED', stat: CheckState.MODERATED },
   {
-    ru: 'Не принят',
+    ru: 'Нечеткие изображения',
     uz: 'No translation / Не принят',
     key: 'REJECT_REASON_1',
+    stat: CheckState.REJECTED,
+  },
+  {
+    ru: 'Неверные банковские данные',
+    uz: 'No translation / Не принят',
+    key: 'REJECT_REASON_2',
+    stat: CheckState.REJECTED,
+  },
+  {
+    ru: 'Неверный ПИНФЛ',
+    uz: 'No translation / Не принят',
+    key: 'REJECT_REASON_3',
+    stat: CheckState.REJECTED,
+  },
+  {
+    ru: 'Нечеткая фотография чека',
+    uz: 'No translation / Не принят',
+    key: 'REJECT_REASON_4',
+    stat: CheckState.REJECTED,
+  },
+  {
+    ru: 'Нечеткая фотография товара',
+    uz: 'No translation / Не принят',
+    key: 'REJECT_REASON_5',
+    stat: CheckState.REJECTED,
+  },
+  {
+    ru: 'Нечеткая фотография удостоверения',
+    uz: 'No translation / Не принят',
+    key: 'REJECT_REASON_6',
+    stat: CheckState.REJECTED,
+  },
+  {
+    ru: 'ФИО в удостоверении не соответствует ФИО банковской карты',
+    uz: 'No translation / Не принят',
+    key: 'REJECT_REASON_7',
+    stat: CheckState.REJECTED,
+  },
+  {
+    ru: 'Возврат средств уже был оформлен',
+    uz: 'No translation / Не принят',
+    key: 'REJECT_REASON_8',
     stat: CheckState.REJECTED,
   },
   // {

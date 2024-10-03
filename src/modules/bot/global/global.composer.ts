@@ -129,8 +129,12 @@ export class globalComposer extends BaseComposer {
         range.text(label({ text: LOCALES.yes }), async (ctx) => {
           ctx.menu.close();
           ctx.session.step = BotStep.default;
-          await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
-          await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
+          const result = await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
+          if (result.error) {
+            await ctx.reply(ctx.i18n.t(LOCALES.request_rejected));
+          } else {
+            await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
+          }
         });
         break;
       }

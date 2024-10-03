@@ -67,9 +67,6 @@ export class User {
 
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
-
-  @Property({ nullable: true })
-  email: string;
 }
 export class UserRepository extends EntityRepository<User> {
   findOrCreate(where: Partial<User>, payload: Partial<User>): Promise<User> {

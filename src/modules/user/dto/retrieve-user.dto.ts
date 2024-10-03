@@ -13,7 +13,6 @@ export class RetrieveUserDto {
     this.registered = user.registered;
     // this.passport = user.passport;
     // this.address = user.address;
-    this.email = user.email;
     this.credentials = user.credentials;
   }
   id: string;
@@ -27,6 +26,5 @@ export class RetrieveUserDto {
   // passport: string;
   credentials: string;
   // address: string;
-  email: string;
   createdAt: Date;
 }
