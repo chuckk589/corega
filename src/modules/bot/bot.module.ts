@@ -38,10 +38,32 @@ export class BotModule {
       { command: 'rules', description: 'Правила' },
       { command: 'contacts', description: 'Обратная связь' },
     ]);
-    checkLocalesKeys();
+    // addMissingKeys();
     bot.start();
     return bot;
   }
+}
+function addMissingKeys() {
+  //open imported locale if exists
+  const ruDonor = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../locales/ru.json'), 'utf-8'));
+  const uzDonor = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../locales/uz.json'), 'utf-8'));
+
+  const ruNew = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../src/modules/bot/locales/ru.json'), 'utf-8'));
+  const uzNew = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../src/modules/bot/locales/uz.json'), 'utf-8'));
+
+  const ruKeys = Object.keys(ruDonor);
+
+  const ruNewKeys = Object.keys(ruNew);
+
+  const ruMissingKeys = ruNewKeys.filter((key) => !ruKeys.includes(key));
+  console.log('Missing keys:', ruMissingKeys);
+  for (const key of ruMissingKeys) {
+    ruDonor[key] = ruNew[key];
+    uzDonor[key] = uzNew[key];
+  }
+  fs.writeFileSync(path.resolve(__dirname, '../../../locales/ru.json'), JSON.stringify(ruDonor, null, 2));
+  fs.writeFileSync(path.resolve(__dirname, '../../../locales/uz.json'), JSON.stringify(uzDonor, null, 2));
+  console.log('done');
 }
 function checkLocalesKeys() {
   // const ruLocale = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../bot/locales/ru.json'), 'utf-8'));
