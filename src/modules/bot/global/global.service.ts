@@ -114,7 +114,7 @@ export class globalService {
     },
   ) {
     const user = await this.em.findOneOrFail(User, { chatId: String(from) }, { populate: ['checks'] });
-    const check = await this.em.findOne(Check, { user: { id: { $ne: user.id } }, cardNumber: payload.cardNumber });
+    const check = await this.em.findOne(Check, { user: { id: { $ne: user.id } }, $or: [{ cardNumber: payload.cardNumber }, { pinfl: payload.pinfl }] });
     if (check) {
       return { error: true };
     }
