@@ -107,6 +107,7 @@ export interface Session {
       idPath: string;
       pinfl: string;
       cardNumber: string;
+      accountNumber: string;
     };
     tickets: {
       data: RetrieveTicketDto[];

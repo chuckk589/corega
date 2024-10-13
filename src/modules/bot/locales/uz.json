@@ -93,7 +93,7 @@
   "question_11p_answer": "Agar Sizda mahsulotlardan foydalanish bo’yicha savollar qolgan bo’lsa, unda ular quyidagi bandlarda ko’rsatilgan va shuningdek, eng keng tarqalgan savollarning to’liq ro’yxati bilan https://corega.com/ru-ru/frequently-asked-questions/ havolasi orqali tanishishingiz mumkin",
   "reject": "Rad etish",
   "request_accepted": "Rahmat! Sizning ma'lumotlaringiz tekshirish uchun yuborilgan, agar biron bir xato bo'lsa, operatorimiz siz bilan bog'lanadi.\nAgar hamma narsa to'g'ri bo'lsa, tekshirgandan so'ng siz tegishli bildirishnoma olasiz.\nOgohlantirishlarni o'tkazib yubormaslik uchun botdan bildirishnomalarni o'chirmang",
-  "request_card": "Bank kartangiz raqamingizni yuboring. (kartadagi ism shaxsiy guvohnomaga mos kelishi kerakligi haqida ogohlantirish xabari bilan) - ma'lumotlarni qayta yuborishni ta'minlash, karta ochilgan bank nomini va tranzit joriy hisob raqamini yuborish",
+  "request_card": "Bank kartangiz raqamingizni yuboring",
   "request_id": "Jpeg/png formatida ID kartangiz yoki pasportingizning fotosurati/skanerini yuklang",
   "request_photo": "Mahsulotning ochiq o'ramining fotosuratini yuklang. Surat qabul qilinishi uchun, iltimos, buyum toʻliq suratga olingan va aniq koʻrinib turganligiga ishonch hosil qiling",
   "restricted_age": "Kechirasiz, lekin bizning kompaniyamiz siyosati 18 yoshgacha bo'lgan foydalanuvchilarga aksiyada qatnashishga ruxsat bermaydi. Siz kattalarni biridan aksiyada ishtirok etishingizga yordam berishini so'rashingiz mumkin!",
@@ -115,5 +115,6 @@
   "yes": "Ha",
   "already_participated": "Siz allaqachon aksiyada ishtirok etganmisiz",
   "no_refunds": "Afsus, mablag'laringiz hali qaytarilmadi",
-  "my_refunds": "Qaytimlarim"
+  "my_refunds": "Qaytimlarim",
+  "request_account": "Nomini va tranzit joriy hisob raqamini yuborish"
 }

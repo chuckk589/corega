@@ -7,7 +7,7 @@ const initial = (): Session => ({
   bulkId: undefined,
   step: BotStep.default,
   isRegistered: undefined,
-  userData: { tickets: { data: [], currentIndex: 0 }, check: { checkPath: '', goodPath: '', idPath: '', pinfl: '', cardNumber: '' } },
+  userData: { tickets: { data: [], currentIndex: 0 }, check: { checkPath: '', goodPath: '', idPath: '', pinfl: '', cardNumber: '', accountNumber: '' } },
 });
 
 function getSessionKey(ctx: BotContext): string | undefined {

@@ -32,6 +32,9 @@ export class Check extends CustomBaseEntity {
   @Property({ length: 255 })
   cardNumber!: string;
 
+  @Property()
+  accountNumber: string;
+
   @ManyToOne(() => User)
   user!: User;
 

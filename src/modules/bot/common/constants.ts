@@ -68,4 +68,5 @@ export enum LOCALES {
   pending = 'pending',
   promo_questions = 'promo_questions',
   product_questions = 'product_questions',
+  request_account = 'request_account',
 }

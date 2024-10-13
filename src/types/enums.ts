@@ -11,10 +11,11 @@ export enum BotStep {
   faq2 = 'faq2',
   //participate
   pStep1 = 'pStep1',
-  pStep2 = 'pStep2',
-  pStep3 = 'pStep3',
-  pStep4 = 'pStep4',
-  pStep5 = 'pStep5',
+  pStep2 = 'pStep2', // check
+  pStep3 = 'pStep3', // id path
+  pStep4 = 'pStep4', // pinfl
+  pStep5 = 'pStep5', // card number
+  pStep6 = 'pStep6', // account number
   tickets = 'tickets',
   ticketsEdit = 'ticketsEdit',
   ticketsCreate = 'ticketsCreate',

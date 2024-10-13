@@ -127,6 +127,14 @@ export class globalComposer extends BaseComposer {
       }
       case BotStep.pStep5: {
         range.text(label({ text: LOCALES.yes }), async (ctx) => {
+          ctx.session.step = BotStep.pStep6;
+          ctx.menu.close();
+          await ctx.reply(ctx.i18n.t(LOCALES.request_account));
+        });
+        break;
+      }
+      case BotStep.pStep6: {
+        range.text(label({ text: LOCALES.yes }), async (ctx) => {
           ctx.menu.close();
           ctx.session.step = BotStep.default;
           const result = await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
@@ -282,7 +290,7 @@ export class globalComposer extends BaseComposer {
           ctx.menu.close();
           ctx.session.step = BotStep.phone;
 
-          const msg = await ctx.replyWithPhoto(cache.resolveAsset('phone'), { reply_markup: new Keyboard().requestContact(ctx.i18n.t(LOCALES.contact)).oneTime() });
+          const msg = await ctx.replyWithPhoto(cache.resolveAsset('phone'), { reply_markup: new Keyboard().requestContact(ctx.i18n.t(LOCALES.contact)).oneTime().resized() });
           cache.cacheAsset('phone', msg);
         });
         range.text(label({ text: LOCALES.reject }), async (ctx) => {
@@ -393,6 +401,10 @@ export class globalComposer extends BaseComposer {
       // ctx.session.step = BotStep.default;
       // await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
       // await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
+      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+    })
+    .route(BotStep.pStep6, async (ctx: BotContext) => {
+      ctx.session.userData.check.accountNumber = ctx.message.text;
       await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
     })
     .route(BotStep.ticketsReply, async (ctx: BotContext) => {
