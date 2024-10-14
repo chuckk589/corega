@@ -15,6 +15,8 @@ import { LOCALES } from '../common/constants';
 import { FAQ1_QUESTION_AMOUNT, FAQ2_QUESTION_AMOUNT } from 'src/constants';
 import { TicketStatus } from 'src/modules/mikroorm/entities/Ticket';
 import { TicketService } from 'src/modules/ticket/ticket.service';
+import { Message } from 'grammy/types';
+import { join } from 'path';
 // import { AccountComposer } from '../account/account.composer';
 
 @ComposerController
@@ -26,6 +28,7 @@ export class globalComposer extends BaseComposer {
     private readonly ticketService: TicketService,
   ) {
     super();
+    this.mMenu.register(this.partMenu);
   }
   @Use(undefined, 'filter')
   tickets = new Menu<BotContext>('ticket-menu').dynamic((ctx, range) => {
@@ -90,83 +93,110 @@ export class globalComposer extends BaseComposer {
       }
     }
   });
-  @Use()
-  validateMenu = new Menu<BotContext>('validate-menu').dynamic((ctx, range) => {
-    switch (ctx.session.step) {
-      case BotStep.pStep1: {
-        range.text(label({ text: LOCALES.yes }), async (ctx) => {
-          ctx.session.step = BotStep.pStep2;
-          ctx.menu.close();
-          await ctx.reply(ctx.i18n.t(LOCALES.request_photo));
-        });
-        break;
-      }
-      case BotStep.pStep2: {
-        range.text(label({ text: LOCALES.yes }), async (ctx) => {
-          ctx.session.step = BotStep.pStep3;
-          ctx.menu.close();
-          await ctx.reply(ctx.i18n.t(LOCALES.request_id));
-        });
-        break;
-      }
-      case BotStep.pStep3: {
-        range.text(label({ text: LOCALES.yes }), async (ctx) => {
-          ctx.session.step = BotStep.pStep4;
-          ctx.menu.close();
-          await ctx.reply(ctx.i18n.t(LOCALES.request_pinfl));
-        });
-        break;
-      }
-      case BotStep.pStep4: {
-        range.text(label({ text: LOCALES.yes }), async (ctx) => {
-          ctx.session.step = BotStep.pStep5;
-          ctx.menu.close();
-          await ctx.reply(ctx.i18n.t(LOCALES.request_card));
-        });
-        break;
-      }
-      case BotStep.pStep5: {
-        range.text(label({ text: LOCALES.yes }), async (ctx) => {
-          ctx.session.step = BotStep.pStep6;
-          ctx.menu.close();
-          await ctx.reply(ctx.i18n.t(LOCALES.request_account));
-        });
-        break;
-      }
-      case BotStep.pStep6: {
-        range.text(label({ text: LOCALES.yes }), async (ctx) => {
-          ctx.menu.close();
-          ctx.session.step = BotStep.default;
-          const result = await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
-          if (result.error) {
-            await ctx.reply(ctx.i18n.t(LOCALES.request_rejected));
-          } else {
-            await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
-          }
-        });
-        break;
-      }
-    }
-    range.text(label({ text: LOCALES.no }), async (ctx) => {
+
+  // @Use()
+  // validateMenu = new Menu<BotContext>('validate-menu').dynamic((ctx, range) => {
+  //   switch (ctx.session.step) {
+  //     case BotStep.pStep1: {
+  //       range.text(label({ text: LOCALES.yes }), async (ctx) => {
+  //         ctx.session.step = BotStep.pStep2;
+  //         ctx.menu.close();
+  //         await ctx.reply(ctx.i18n.t(LOCALES.request_photo));
+  //       });
+  //       break;
+  //     }
+  //     case BotStep.pStep2: {
+  //       range.text(label({ text: LOCALES.yes }), async (ctx) => {
+  //         ctx.session.step = BotStep.pStep3;
+  //         ctx.menu.close();
+  //         await ctx.reply(ctx.i18n.t(LOCALES.request_id));
+  //       });
+  //       break;
+  //     }
+  //     case BotStep.pStep3: {
+  //       range.text(label({ text: LOCALES.yes }), async (ctx) => {
+  //         ctx.session.step = BotStep.pStep4;
+  //         ctx.menu.close();
+  //         // await ctx.reply(ctx.i18n.t(LOCALES.request_pinfl));
+  //         const msg = await ctx.replyWithPhoto(cache.resolveAsset('pinfl_help'), { caption: ctx.i18n.t(LOCALES.request_pinfl) });
+  //         cache.cacheAsset('pinfl_help', msg);
+  //       });
+  //       break;
+  //     }
+  //     case BotStep.pStep4: {
+  //       range.text(label({ text: LOCALES.yes }), async (ctx) => {
+  //         ctx.session.step = BotStep.pStep5;
+  //         ctx.menu.close();
+  //         await ctx.reply(ctx.i18n.t(LOCALES.request_card));
+  //       });
+  //       break;
+  //     }
+  //     case BotStep.pStep5: {
+  //       range.text(label({ text: LOCALES.yes }), async (ctx) => {
+  //         ctx.session.step = BotStep.pStep6;
+  //         ctx.menu.close();
+  //         await ctx.reply(ctx.i18n.t(LOCALES.request_account));
+  //       });
+  //       break;
+  //     }
+  //     case BotStep.pStep6: {
+  //       range.text(label({ text: LOCALES.yes }), async (ctx) => {
+  //         ctx.menu.close();
+  //         ctx.session.step = BotStep.default;
+  //         const result = await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
+  //         if (result.error) {
+  //           await ctx.reply(ctx.i18n.t(LOCALES.request_rejected));
+  //         } else {
+  //           await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
+  //         }
+  //       });
+  //       break;
+  //     }
+  //   }
+  //   range.text(label({ text: LOCALES.back }), async (ctx) => {
+  //     ctx.menu.close();
+  //     await ctx.editMessageText(ctx.i18n.t(LOCALES.ask_resend));
+  //   });
+  // });
+
+  partMenu = new Menu<BotContext>('part-menu').dynamic((ctx, range) => {
+    range.text(label({ text: LOCALES.cancel }), async (ctx) => {
+      ctx.session.step = BotStep.default;
       ctx.menu.close();
-      await ctx.editMessageText(ctx.i18n.t(LOCALES.ask_resend));
+      const msg = await ctx.replyWithPhoto(cache.resolveAsset(`menu_${ctx.i18n.locale()}`), { reply_markup: this.mMenu });
+      cache.cacheAsset(`menu_${ctx.i18n.locale()}`, msg);
     });
-  });
-  @Use()
-  lang = new Menu<BotContext>('lang-menu').dynamic((ctx, range) => {
-    Object.values(Locale).map((lang) =>
-      range.text(label({ text: lang as any }), async (ctx) => {
-        await this.globalService.updateUser(ctx.from.id, { locale: lang as Locale });
-        ctx.i18n.locale(lang);
-        await ctx.deleteMessage();
-        await ctx.reply(ctx.i18n.t(LOCALES.language_changed));
-      }),
-    );
+    if (ctx.session.step == BotStep.pFinish) {
+      range.text(label({ text: LOCALES.yes }), async (ctx) => {
+        ctx.menu.close();
+        ctx.session.step = BotStep.default;
+        const result = await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
+        if (result.error) {
+          await ctx.reply(ctx.i18n.t(LOCALES.request_rejected));
+        } else {
+          await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
+        }
+      });
+    }
   });
 
   @Use()
   mMenu = new Menu<BotContext>('main-menu').dynamic((ctx, range) => {
     switch (ctx.session.step) {
+      case BotStep.lang: {
+        Object.values(Locale).map((lang) =>
+          range.text(label({ text: lang as any }), async (ctx) => {
+            await this.globalService.updateUser(ctx.from.id, { locale: lang as Locale });
+            ctx.i18n.locale(lang);
+            ctx.session.step = BotStep.default;
+            // const msg = await ctx.replyWithPhoto(cache.resolveAsset(`menu_${lang}`), { reply_markup: this.mMenu });
+            // cache.cacheAsset(`menu_${lang}`, msg);
+            const msg = await ctx.editMessageMedia({ caption: ctx.i18n.t(LOCALES.main_menu), media: cache.resolveAsset(`menu_${lang}`), type: 'photo' });
+            cache.cacheAsset(`menu_${lang}`, msg as Message.PhotoMessage);
+          }),
+        );
+        break;
+      }
       case BotStep.default: {
         range.text(label({ text: LOCALES.participate }), async (ctx) => {
           const alreadyParticipated = await this.globalService.checkParticipation(ctx.from.id);
@@ -174,9 +204,21 @@ export class globalComposer extends BaseComposer {
             await ctx.reply(ctx.i18n.t(LOCALES.already_participated));
             return;
           }
+          ctx.deleteMessage();
           ctx.session.step = BotStep.pStep1;
-          await ctx.reply(ctx.i18n.t(LOCALES.participate_details));
+          const msg = await ctx.reply(ctx.i18n.t(LOCALES.participate_details), { reply_markup: this.partMenu });
+          ctx.session.menuId = msg.message_id;
         });
+        // range.submenu(label({ text: LOCALES.participate }), 'part-menu', async (ctx) => {
+        //   const alreadyParticipated = await this.globalService.checkParticipation(ctx.from.id);
+        //   if (alreadyParticipated) {
+        //     await ctx.reply(ctx.i18n.t(LOCALES.already_participated));
+        //     return;
+        //   } else {
+        //     ctx.session.step = BotStep.pStep1;
+        //     await ctx.editMessageCaption({ caption: ctx.i18n.t(LOCALES.participate_details) });
+        //   }
+        // });
         range.row();
         range.text(label({ text: LOCALES.rules }), async (ctx) => {
           const msg = await ctx.replyWithDocument(cache.resolveAsset(`oferta_${ctx.i18n.locale()}`));
@@ -184,12 +226,15 @@ export class globalComposer extends BaseComposer {
         });
         range.row();
         range.text(label({ text: LOCALES.switch_language }), async (ctx) => {
-          await ctx.reply(ctx.i18n.t(LOCALES.switch_lang_content), { reply_markup: this.lang });
+          // await ctx.reply(ctx.i18n.t(LOCALES.switch_lang_content), { reply_markup: this.lang });
+          ctx.session.step = BotStep.lang;
+          const msg = await ctx.editMessageMedia({ caption: ctx.i18n.t(LOCALES.switch_lang_content), media: cache.resolveAsset(`lang`), type: 'photo' });
+          cache.cacheAsset(`lang`, msg as Message.PhotoMessage);
         });
         range.row();
         range.text(label({ text: LOCALES.about }), async (ctx) => {
-          const msg = await ctx.replyWithPhoto(cache.resolveAsset('about'), { caption: ctx.i18n.t(LOCALES.about_details) });
-          cache.cacheAsset('about', msg);
+          const msg = await ctx.replyWithPhoto(cache.resolveAsset(`about_${ctx.i18n.locale()}`), { caption: ctx.i18n.t(LOCALES.about_details) });
+          cache.cacheAsset(`about_${ctx.i18n.locale()}`, msg);
         });
         range.row();
         range.text(label({ text: LOCALES.account }), async (ctx) => {
@@ -290,8 +335,8 @@ export class globalComposer extends BaseComposer {
           ctx.menu.close();
           ctx.session.step = BotStep.phone;
 
-          const msg = await ctx.replyWithPhoto(cache.resolveAsset('phone'), { reply_markup: new Keyboard().requestContact(ctx.i18n.t(LOCALES.contact)).oneTime().resized() });
-          cache.cacheAsset('phone', msg);
+          const msg = await ctx.replyWithPhoto(cache.resolveAsset(`phone_${ctx.i18n.locale()}`), { reply_markup: new Keyboard().requestContact(ctx.i18n.t(LOCALES.contact)).oneTime().resized() });
+          cache.cacheAsset(`phone_${ctx.i18n.locale()}`, msg);
         });
         range.text(label({ text: LOCALES.reject }), async (ctx) => {
           ctx.menu.close();
@@ -320,9 +365,15 @@ export class globalComposer extends BaseComposer {
           await ctx.reply(ctx.i18n.t(LOCALES.ask_name), { reply_markup: { remove_keyboard: true } });
         });
         range.text(label({ text: LOCALES.no }), async (ctx) => {
-          ctx.menu.close();
-          ctx.session.step = BotStep.default;
-          await ctx.reply(ctx.i18n.t(LOCALES.restricted_residence), { reply_markup: { remove_keyboard: true } });
+          ctx.session.step = BotStep.residentDecline;
+          await ctx.editMessageText(ctx.i18n.t(LOCALES.restricted_residence));
+        });
+        break;
+      }
+      case BotStep.residentDecline: {
+        range.text(label({ text: LOCALES.back }), async (ctx) => {
+          ctx.session.step = BotStep.resident;
+          await ctx.editMessageText(ctx.i18n.t(LOCALES.ask_residence));
         });
         break;
       }
@@ -335,14 +386,15 @@ export class globalComposer extends BaseComposer {
             ctx.menu.close();
             await this.globalService.finishRegistration(ctx);
             // await ctx.reply(ctx.i18n.t(LOCALES.registered), { reply_markup: mainKeyboard(ctx) });
-            const msg = await ctx.replyWithPhoto(cache.resolveAsset('about'), { reply_markup: this.mMenu });
-            cache.cacheAsset('about', msg);
+            const msg = await ctx.replyWithPhoto(cache.resolveAsset(`menu_${ctx.i18n.locale()}`), { reply_markup: this.mMenu });
+            cache.cacheAsset(`menu_${ctx.i18n.locale()}`, msg);
           }),
             index % 3 === 0 && range.row();
         });
         break;
       }
     }
+
     return range;
   });
 
@@ -355,11 +407,11 @@ export class globalComposer extends BaseComposer {
     ctx.i18n.locale(user.locale);
     if (ctx.session.isRegistered) {
       // await ctx.reply(ctx.i18n.t(LOCALES.main_menu), { reply_markup: mainKeyboard(ctx) });
-      const msg = await ctx.replyWithPhoto(cache.resolveAsset('menu'), { reply_markup: this.mMenu });
-      cache.cacheAsset('menu', msg);
+      const msg = await ctx.replyWithPhoto(cache.resolveAsset(`menu_${ctx.i18n.locale()}`), { reply_markup: this.mMenu });
+      cache.cacheAsset(`menu_${ctx.i18n.locale()}`, msg);
     } else {
-      const msg = await ctx.replyWithPhoto(cache.resolveAsset('start'), { reply_markup: this.menu });
-      cache.cacheAsset('start', msg);
+      const msg = await ctx.replyWithPhoto(cache.resolveAsset('lang'), { reply_markup: this.menu });
+      cache.cacheAsset('lang', msg);
     }
   };
   @Command('menu')
@@ -372,7 +424,10 @@ export class globalComposer extends BaseComposer {
   };
   @Command('contacts')
   contacts = async (ctx: BotContext) => {
-    await ctx.reply(ctx.i18n.t(LOCALES.contacts_details));
+    // await ctx.reply(ctx.i18n.t(LOCALES.contacts_details));
+    ctx.session.step = BotStep.tickets;
+    ctx.session.userData.tickets.data = await this.ticketService.findAll({ user: { chatId: ctx.from.id.toString() } });
+    await ctx.reply(ctx.i18n.t(LOCALES.helpDetails), { reply_markup: this.tickets });
   };
   @On(':contact')
   contact = async (ctx: BotContext) => {
@@ -388,24 +443,41 @@ export class globalComposer extends BaseComposer {
     .route(BotStep.name, async (ctx: BotContext) => {
       ctx.session.userData.credentials = ctx.message.text;
       ctx.session.step = BotStep.city;
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_city, { name: ctx.session.userData.credentials }), { reply_markup: this.menu });
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_city, { name: ctx.session.userData.credentials }), { reply_markup: this.menu });
+      const msg = await ctx.replyWithPhoto(cache.resolveAsset(`city_${ctx.i18n.locale()}`), { caption: ctx.i18n.t(LOCALES.ask_city), reply_markup: this.menu });
+      cache.cacheAsset(`city_${ctx.i18n.locale()}`, msg);
     })
     .route(BotStep.pStep4, async (ctx: BotContext) => {
       ctx.session.userData.check.pinfl = ctx.message.text;
-      // ctx.session.step = BotStep.pStep5;
-      // await ctx.reply(ctx.i18n.t(LOCALES.request_card));
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      ctx.session.step = BotStep.pStep5;
+      await ctx.clean();
+      const msg = await ctx.reply(ctx.i18n.t(LOCALES.request_card), { reply_markup: this.partMenu });
+      ctx.session.menuId = msg.message_id;
     })
     .route(BotStep.pStep5, async (ctx: BotContext) => {
       ctx.session.userData.check.cardNumber = ctx.message.text;
-      // ctx.session.step = BotStep.default;
-      // await this.globalService.applyRequest(ctx.from.id, ctx.session.userData.check);
-      // await ctx.reply(ctx.i18n.t(LOCALES.request_accepted));
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      ctx.session.step = BotStep.pStep6;
+      await ctx.clean();
+      const msg = await ctx.reply(ctx.i18n.t(LOCALES.request_account), { reply_markup: this.partMenu });
+      ctx.session.menuId = msg.message_id;
     })
     .route(BotStep.pStep6, async (ctx: BotContext) => {
       ctx.session.userData.check.accountNumber = ctx.message.text;
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      ctx.session.step = BotStep.pFinish;
+      await ctx.clean();
+      const path = join(__dirname, '../../../public/');
+
+      await ctx.replyWithMediaGroup([
+        { type: 'photo', media: new InputFile(path + ctx.session.userData.check.checkPath), caption: 'Check' },
+        { type: 'photo', media: new InputFile(path + ctx.session.userData.check.goodPath), caption: 'Good' },
+        { type: 'photo', media: new InputFile(path + ctx.session.userData.check.idPath), caption: 'ID' },
+      ]);
+      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation, { pinfl: ctx.session.userData.check.pinfl, cardNumber: ctx.session.userData.check.cardNumber, transitAccount: ctx.session.userData.check.accountNumber }), {
+        reply_markup: this.partMenu,
+      });
     })
     .route(BotStep.ticketsReply, async (ctx: BotContext) => {
       if (ctx.message) {
@@ -431,27 +503,33 @@ export class globalComposer extends BaseComposer {
     if (ctx.session.step == BotStep.pStep1) {
       const path = await this.globalService.downloadFile(ctx);
       ctx.session.userData.check.checkPath = path;
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
-      // ctx.session.step = BotStep.pStep2;
-      // await ctx.reply(ctx.i18n.t(LOCALES.request_photo));
+      await ctx.clean();
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.mMenu });
+      ctx.session.step = BotStep.pStep2;
+      const msg = await ctx.reply(ctx.i18n.t(LOCALES.request_photo), { reply_markup: this.partMenu });
+      ctx.session.menuId = msg.message_id;
     }
     //upload good
     else if (ctx.session.step == BotStep.pStep2) {
       const path = await this.globalService.downloadFile(ctx);
       ctx.session.userData.check.goodPath = path;
-      // ctx.session.step = BotStep.pStep3;
-      // await ctx.reply(ctx.i18n.t(LOCALES.request_id));
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      await ctx.clean();
+      ctx.session.step = BotStep.pStep3;
+      const msg = await ctx.reply(ctx.i18n.t(LOCALES.request_id), { reply_markup: this.partMenu });
+      ctx.session.menuId = msg.message_id;
     }
     //upload id
     else if (ctx.session.step == BotStep.pStep3) {
       const path = await this.globalService.downloadFile(ctx);
       ctx.session.userData.check.idPath = path;
-      // ctx.session.step = BotStep.pStep4;
-      // await ctx.reply(ctx.i18n.t(LOCALES.request_id));
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_validation), { reply_markup: this.validateMenu });
+      ctx.session.step = BotStep.pStep4;
+      await ctx.clean();
+      const msg = await ctx.replyWithPhoto(cache.resolveAsset('pinfl_help'), { caption: ctx.i18n.t(LOCALES.request_pinfl), reply_markup: this.partMenu, parse_mode: 'HTML' });
+      cache.cacheAsset('pinfl_help', msg);
+      ctx.session.menuId = msg.message_id;
     }
-    // const checkTypeKey = ctx.session.step == BotStep.uploadBarcode ? 'barcodeAccepted' : 'checkAccepted';
   };
   @Command('clean')
   clean = async (ctx: BotContext) => {

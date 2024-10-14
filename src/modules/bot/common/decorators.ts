@@ -133,16 +133,6 @@ function createListenerDecorator<T>(method: ComposerMethod) {
   };
 }
 
-// function createMenuListenerDecorator(method: ComposerMethod) {
-//   return (owningMenu: string, resolveKey: string): PropertyDecorator => {
-//     return (_target: any, _key?: any) => {
-//       const previousValue: BotListenerMetadata[] = Reflect.getMetadata(LISTENERS_METADATA, _target);
-//       const parent: BotListenerMetadata = previousValue.find((r) => r.payload == owningMenu);
-//       if (!parent) throw new Error('Parent menu doesnt exists');
-//       parent.children.push(new BotListenerMetadata(method, resolveKey, _key));
-//     };
-//   };
-// }
 export const Use = createListenerDecorator(ComposerMethod.use);
 export const Command = createListenerDecorator<string>(ComposerMethod.command);
 // export const Menu = createListenerDecorator<string>(ComposerMethod.menu);

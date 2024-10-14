@@ -27,7 +27,6 @@ export enum LOCALES {
   ask_name = 'ask_name',
   helpDetails = 'helpDetails',
   participate = 'participate',
-  ask_resend = 'ask_resend',
   about = 'about',
   REJECT_REASON = 'REJECT_REASON',
   account = 'account',
