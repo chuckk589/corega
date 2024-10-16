@@ -8,8 +8,8 @@ export enum BotStep {
   name = 'name',
   city = 'city',
   faq = 'faq',
-  faq1 = 'faq1',
-  faq2 = 'faq2',
+  // faq1 = 'faq1',
+  // faq2 = 'faq2',
   lang = 'lang',
   pStep1 = 'pStep1',
   pStep2 = 'pStep2', // check
