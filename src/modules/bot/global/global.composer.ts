@@ -309,8 +309,29 @@ export class globalComposer extends BaseComposer {
         });
         range.text(label({ text: LOCALES.reject }), async (ctx) => {
           ctx.menu.close();
-          ctx.session.step = BotStep.default;
-          await ctx.reply(ctx.i18n.t(LOCALES.restricted_rules));
+          ctx.session.step = BotStep.rulesDecline;
+          await ctx.reply(ctx.i18n.t(LOCALES.restricted_rules), { reply_markup: this.menu });
+        });
+        break;
+      }
+      case BotStep.ageDecline:
+      case BotStep.rulesDecline:
+      case BotStep.residentDecline: {
+        range.text(label({ text: LOCALES.back }), async (ctx) => {
+          // ctx.session.step = BotStep.resident;
+          // await ctx.editMessageText(ctx.i18n.t(LOCALES.ask_residence));
+          if (ctx.session.step == BotStep.ageDecline) {
+            ctx.session.step = BotStep.age;
+            await ctx.editMessageText(ctx.i18n.t(LOCALES.ask_age));
+          } else if (ctx.session.step == BotStep.rulesDecline) {
+            ctx.session.step = BotStep.rules;
+            ctx.menu.close();
+            const msg = await ctx.replyWithDocument(cache.resolveAsset(`oferta_${ctx.i18n.locale()}`), { reply_markup: this.menu });
+            cache.cacheAsset(`oferta_${ctx.i18n.locale()}`, msg);
+          } else if (ctx.session.step == BotStep.residentDecline) {
+            ctx.session.step = BotStep.resident;
+            await ctx.editMessageText(ctx.i18n.t(LOCALES.ask_residence));
+          }
         });
         break;
       }
@@ -321,17 +342,17 @@ export class globalComposer extends BaseComposer {
           await ctx.reply(ctx.i18n.t(LOCALES.ask_residence), { reply_markup: this.menu });
         });
         range.text(label({ text: LOCALES.no }), async (ctx) => {
-          ctx.menu.close();
-          ctx.session.step = BotStep.default;
-          await ctx.reply(ctx.i18n.t(LOCALES.restricted_age));
+          ctx.session.step = BotStep.ageDecline;
+          await ctx.editMessageText(ctx.i18n.t(LOCALES.restricted_age));
         });
         break;
       }
       case BotStep.resident: {
         range.text(label({ text: LOCALES.yes }), async (ctx) => {
           ctx.menu.close();
-          ctx.session.step = BotStep.name;
-          await ctx.reply(ctx.i18n.t(LOCALES.ask_name), { reply_markup: { remove_keyboard: true } });
+          ctx.session.step = BotStep.city;
+          const msg = await ctx.replyWithPhoto(cache.resolveAsset(`city_${ctx.i18n.locale()}`), { caption: ctx.i18n.t(LOCALES.ask_city), reply_markup: this.menu });
+          cache.cacheAsset(`city_${ctx.i18n.locale()}`, msg);
         });
         range.text(label({ text: LOCALES.no }), async (ctx) => {
           ctx.session.step = BotStep.residentDecline;
@@ -339,13 +360,7 @@ export class globalComposer extends BaseComposer {
         });
         break;
       }
-      case BotStep.residentDecline: {
-        range.text(label({ text: LOCALES.back }), async (ctx) => {
-          ctx.session.step = BotStep.resident;
-          await ctx.editMessageText(ctx.i18n.t(LOCALES.ask_residence));
-        });
-        break;
-      }
+
       case BotStep.city: {
         this.AppConfigService.cities.map((city, index) => {
           range.text(label({ text: city.translation[locale] as any }), async (ctx) => {
@@ -402,8 +417,10 @@ export class globalComposer extends BaseComposer {
   contact = async (ctx: BotContext) => {
     if (ctx.session.step == BotStep.phone) {
       ctx.session.userData.phone = ctx.message.contact.phone_number;
-      ctx.session.step = BotStep.age;
-      await ctx.reply(ctx.i18n.t(LOCALES.ask_age), { reply_markup: this.menu });
+      // ctx.session.step = BotStep.age;
+      // await ctx.reply(ctx.i18n.t(LOCALES.ask_age), { reply_markup: this.menu });
+      ctx.session.step = BotStep.name;
+      await ctx.reply(ctx.i18n.t(LOCALES.ask_name), { reply_markup: { remove_keyboard: true } });
     }
   };
 
@@ -414,10 +431,9 @@ export class globalComposer extends BaseComposer {
   })
     .route(BotStep.name, async (ctx: BotContext) => {
       ctx.session.userData.credentials = ctx.message.text;
-      ctx.session.step = BotStep.city;
-      // await ctx.reply(ctx.i18n.t(LOCALES.ask_city, { name: ctx.session.userData.credentials }), { reply_markup: this.menu });
-      const msg = await ctx.replyWithPhoto(cache.resolveAsset(`city_${ctx.i18n.locale()}`), { caption: ctx.i18n.t(LOCALES.ask_city), reply_markup: this.menu });
-      cache.cacheAsset(`city_${ctx.i18n.locale()}`, msg);
+
+      ctx.session.step = BotStep.age;
+      await ctx.reply(ctx.i18n.t(LOCALES.ask_age), { reply_markup: this.menu });
     })
     .route(BotStep.pStep4, async (ctx: BotContext) => {
       ctx.session.userData.check.pinfl = ctx.message.text;

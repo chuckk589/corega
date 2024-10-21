@@ -5,6 +5,8 @@ export enum BotStep {
   age = 'age',
   resident = 'resident',
   residentDecline = 'residentDecline',
+  rulesDecline = 'rulesDecline',
+  ageDecline = 'ageDecline',
   name = 'name',
   city = 'city',
   faq = 'faq',
