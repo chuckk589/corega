@@ -14,7 +14,12 @@
 
           <v-list-item-title>Пользователи</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/checks" value="2" color="#1867C0">
+        <v-list-item
+          to="/checks"
+          value="2"
+          color="#1867C0"
+          v-if="store.isAdmin"
+        >
           <template v-slot:prepend>
             <v-icon class="mr-5" icon="mdi-image-area"></v-icon>
           </template>
@@ -28,7 +33,12 @@
 
           <v-list-item-title>Розыгрыши</v-list-item-title>
         </v-list-item> -->
-        <v-list-item to="/locales" value="5" color="#1867C0">
+        <v-list-item
+          to="/locales"
+          value="5"
+          color="#1867C0"
+          v-if="store.isAdmin"
+        >
           <template v-slot:prepend>
             <v-icon class="mr-5" icon="mdi-web"></v-icon>
           </template>
@@ -42,7 +52,12 @@
 
           <v-list-item-title>Обращения</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/notifications" value="7" color="#1867C0">
+        <v-list-item
+          to="/notifications"
+          value="7"
+          color="#1867C0"
+          v-if="store.isAdmin"
+        >
           <template v-slot:prepend>
             <v-icon class="mr-5" icon="mdi-email"></v-icon>
           </template>
@@ -76,6 +91,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth';
 import EditComponent from './EditComponent.vue';
 export default {
   name: 'ContainerView',
@@ -87,10 +103,12 @@ export default {
       drawer: false,
     };
   },
+  computed: {
+    store: () => useAuthStore(),
+  },
   methods: {
     logout() {
-      localStorage.removeItem('jwt');
-      this.$router.push({ name: 'login' });
+      this.store.logout();
     },
   },
 };

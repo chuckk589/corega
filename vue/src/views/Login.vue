@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <v-container class="ma-auto" fluid style="max-width: 600px">
-      <v-card class="elevation-8">
+    <v-container>
+      <!-- <v-card class="elevation-8">
         <v-toolbar density="compact">
           <v-toolbar-title>Login</v-toolbar-title>
         </v-toolbar>
@@ -27,43 +27,58 @@
             </v-row>
           </form>
         </v-card-text>
-      </v-card>
+      </v-card> -->
+      {{ errorMessage }}
     </v-container>
   </v-app>
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth';
 export default {
   name: 'App',
   data() {
     return {
       username: '',
-      password: '4060510368',
+      password: '',
       errorMessage: '',
     };
   },
   methods: {
-    login() {
-      this.$http
-        .post('/auth/login', {
-          username: 'admin',
-          password: this.password,
-        })
-        .then((res) => {
-          localStorage.setItem('jwt', res.data.access_token);
-          this.$router.push({ name: 'users' });
-        })
-        .catch((err) => {
-          this.errorMessage = err.response.data.message;
-        });
-    },
+    // login() {
+    //   const query =
+    //   this.$http
+    //     .post('/auth/login', {
+    //       username: 'admin',
+    //       password: this.password,
+    //     })
+    //     .then((res) => {
+    //       localStorage.setItem('jwt', res.data.access_token);
+    //       this.$router.push({ name: 'users' });
+    //     })
+    //     .catch((err) => {
+    //       this.errorMessage = err.response.data.message;
+    //     });
+    // },
   },
-  computed: {
-    toggleMessage: function () {
-      return this.isRegister
-        ? this.stateObj.register.message
-        : this.stateObj.login.message;
-    },
+  mounted() {
+    //get query params
+    const query = this.$route.query;
+    if (!query.token) return;
+    const authStore = useAuthStore();
+    authStore.login(query.token);
+    // this.$http
+    //   .post('/auth/login', {
+    //     username: 'admin',
+    //     password: query.token,
+    //   })
+    //   .then((res) => {
+    //     localStorage.setItem('jwt', query.token);
+    //     this.$router.push({ name: 'users' });
+    //   })
+    //   .catch((err) => {
+    //     this.errorMessage = 'Unauthorized';
+    //   });
   },
 };
 </script>

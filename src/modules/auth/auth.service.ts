@@ -7,11 +7,7 @@ import { compare } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly em: EntityManager,
-    private readonly appConfigService: AppConfigService,
-  ) {}
+  constructor(private readonly jwtService: JwtService, private readonly em: EntityManager, private readonly appConfigService: AppConfigService) {}
 
   async validateUser(pass: string): Promise<any> {
     const valid = await compare(pass, this.appConfigService.get<string>('ADMIN_PASSCODE'));
