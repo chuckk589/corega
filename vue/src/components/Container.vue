@@ -14,12 +14,7 @@
 
           <v-list-item-title>Пользователи</v-list-item-title>
         </v-list-item>
-        <v-list-item
-          to="/checks"
-          value="2"
-          color="#1867C0"
-          v-if="store.isAdmin"
-        >
+        <v-list-item to="/checks" value="2" color="#1867C0">
           <template v-slot:prepend>
             <v-icon class="mr-5" icon="mdi-image-area"></v-icon>
           </template>
