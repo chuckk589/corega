@@ -1,6 +1,17 @@
 <template>
   <div class="h-100">
-    <div class="d-flex mb-2"></div>
+    <div class="d-flex mb-2">
+      <CheckComponent />
+      <v-btn
+        color="error"
+        size="small"
+        @click="remove"
+        append-icon="mdi-trash-can"
+        variant="outlined"
+        class="mr-2"
+        >Удалить</v-btn
+      >
+    </div>
     <AgGridVue
       class="ag-theme-alpine"
       :column-defs="columnDefs"
@@ -14,6 +25,7 @@
       suppressRowClickSelection
       suppressExcelExport
       pagination
+      rowSelection="multiple"
       :defaultCsvExportParams="defaultCsvExportParams"
     >
     </AgGridVue>
@@ -31,12 +43,14 @@
 import { AgGridVue } from 'ag-grid-vue3';
 import CheckCell from '../components/cellRenderers/CheckCell.vue';
 import { agGridMixin } from '@/mixins/agGrid';
+import CheckComponent from '@/components/CheckComponent.vue';
 export default {
   name: 'ChecksView',
   components: {
     AgGridVue,
     // eslint-disable-next-line vue/no-unused-components
     CheckCell,
+    CheckComponent,
   },
   mixins: [agGridMixin],
   data() {
@@ -45,6 +59,8 @@ export default {
         {
           headerName: 'ID',
           field: 'id',
+          headerCheckboxSelection: true,
+          checkboxSelection: true,
         },
         { field: 'fancyId', headerName: 'Id заявки' },
         { field: 'credentials', headerName: 'Имя' },
@@ -59,6 +75,7 @@ export default {
         },
         { field: 'phone', headerName: 'Номер' },
         { field: 'cardNumber', headerName: 'Номер карты' },
+        { field: 'accountNumber', headerName: 'Номер счета' },
         { field: 'pinfl', headerName: 'ПИНФЛ' },
         {
           field: 'status',
@@ -69,6 +86,28 @@ export default {
             valueFormatter: this.cTableFormatter('check_statuses'),
           },
         },
+        {
+          field: 'checkPath',
+          headerName: 'Чек',
+          hide: true,
+          valueFormatter: (params) =>
+            `http://195.210.47.232:3000${params.value}`,
+        },
+        {
+          field: 'goodPath',
+          headerName: 'Товар',
+          hide: true,
+          valueFormatter: (params) =>
+            `http://195.210.47.232:3000${params.value}`,
+        },
+        {
+          field: 'idPath',
+          headerName: 'Удостоверение',
+          hide: true,
+          valueFormatter: (params) =>
+            `http://195.210.47.232:3000${params.value}`,
+        },
+
         {
           field: 'createdAt',
           headerName: 'Дата регистрации',
@@ -101,28 +140,21 @@ export default {
   },
   beforeUnmount() {
     this.$emitter.off('view-check');
+    this.$emitter.off('new-check');
+    this.$emitter.off('delete-check');
   },
   methods: {
-    // importChecks() {
-    //   this.$refs.uploader.click();
-    // },
-    // onFileChanged(e) {
-    //   if (e.target.files.length == 0) return;
-    //   const formData = new FormData();
-    //   formData.append('checks', e.target.files[0]);
-    //   const headers = { 'Content-Type': 'multipart/form-data' };
-    //   this.$http.post('/v1/check/import/', formData, headers).then((res) => {
-    //     this.$refs.uploader.value = null;
-    //     setTimeout(
-    //       () => this.gridApi.applyTransaction({ add: res.data.passedChecks }),
-    //       0,
-    //     );
-    //     this.$emitter.emit('alert', {
-    //       color: 'info',
-    //       text: `Добавлено: ${res.data.statistics.checks.approved} чеков, ${res.data.statistics.barcodes.approved} штрихкодов`,
-    //     });
-    //   });
-    // },
+    remove() {
+      const selectedRows = this.gridApi.getSelectedRows();
+      if (!selectedRows.length) return;
+      const ids = selectedRows.map((c) => c.id);
+      this.$emitter.emit('openDialog', {
+        header: 'Удалить заявки?',
+        message: 'Вы уверены, что хотите удалить выбранные записи?',
+        eventName: 'delete-check',
+        id: ids,
+      });
+    },
     onGridReady(params) {
       this.gridApi = params.api;
       this.$http({ method: 'GET', url: `/v1/check/` }).then((res) => {
@@ -133,6 +165,23 @@ export default {
         const index = this.rowData.findIndex((c) => c.id == evt.id);
         this.rowData[index] = evt;
         this.gridApi.applyTransaction({ update: [evt] });
+      });
+      this.$emitter.on('delete-check', (ids) => {
+        this.$http({
+          method: 'DELETE',
+          url: `/v1/check?ids=${ids.join(',')}`,
+        }).then((res) => {
+          setTimeout(
+            () =>
+              this.gridApi.applyTransaction({
+                remove: res.data.map((id) => this.gridApi.getRowNode(id)),
+              }),
+            0,
+          );
+        });
+      });
+      this.$emitter.on('new-check', (evt) => {
+        this.gridApi.applyTransaction({ add: [evt] });
       });
       this.defaultCsvExportParams = {
         columnKeys: this.columnDefs
@@ -148,8 +197,9 @@ export default {
               colDef: params.column.getColDef(),
             };
             return colDef.valueFormatter(valueFormatterParams);
+          } else {
+            return params.value;
           }
-          return params.value;
         },
       };
     },

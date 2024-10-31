@@ -14,6 +14,7 @@ export class RetrieveCheckDto {
     this.idPath = check.idPath;
     this.pinfl = check.pinfl;
     this.cardNumber = check.cardNumber;
+    this.accountNumber = check.accountNumber;
   }
   id: string;
   fancyId: string;
@@ -27,4 +28,5 @@ export class RetrieveCheckDto {
   idPath: string;
   pinfl: string;
   cardNumber: string;
+  accountNumber: string;
 }

@@ -52,22 +52,40 @@ export class globalService {
 
   async finishRegistration(ctx: BotContext) {
     //check if theres user with same phone already
-    // const formattedPhone = ctx.session.userData.phone.replace(/\D/g, '');
-    // const existingPhoneUser = await this.em.findOne(User, { phone: formattedPhone });
-    const mainUser = await this.em.findOneOrFail(User, { chatId: String(ctx.from.id) });
-    // const mainUser = existingPhoneUser || existingChatUser;
-    // if (existingPhoneUser) {
-    // await this.em.removeAndFlush(existingChatUser);
-    // }
-    mainUser.chatId = String(ctx.from.id);
-    mainUser.locale = ctx.session.userData.locale as Locale;
-    mainUser.phone = ctx.session.userData.phone.replace(/\D/g, '');
-    mainUser.username = ctx.from.username;
-    mainUser.credentials = ctx.session.userData.credentials;
-    mainUser.city = this.em.getReference(City, ctx.session.userData.city_id);
-    // mainUser.email = ctx.session.userData.email;
-    mainUser.registered = true;
-    await this.em.persistAndFlush(mainUser);
+    // const mainUser = await this.em.findOneOrFail(User, { chatId: String(ctx.from.id) });
+    // mainUser.chatId = String(ctx.from.id);
+    // mainUser.locale = ctx.session.userData.locale as Locale;
+    // mainUser.phone = ctx.session.userData.phone.replace(/\D/g, '');
+    // mainUser.username = ctx.from.username;
+    // mainUser.credentials = ctx.session.userData.credentials;
+    // mainUser.city = this.em.getReference(City, ctx.session.userData.city_id);
+    // // mainUser.email = ctx.session.userData.email;
+    // mainUser.registered = true;
+    // await this.em.persistAndFlush(mainUser);
+    const phone = ctx.session.userData.phone.replace(/\D/g, '');
+    //check if theres user with same phone already and update it if so
+    let user = await this.em.findOne(User, { phone });
+    if (!user) {
+      user = this.em.create(User, {
+        chatId: String(ctx.from.id),
+        locale: ctx.session.userData.locale as Locale,
+        phone,
+        username: ctx.from.username,
+        credentials: ctx.session.userData.credentials,
+        city: this.em.getReference(City, ctx.session.userData.city_id),
+        registered: true,
+      });
+    } else {
+      user.chatId = String(ctx.from.id);
+      user.locale = ctx.session.userData.locale as Locale;
+      user.username = ctx.from.username;
+      user.credentials = ctx.session.userData.credentials;
+      user.city = this.em.getReference(City, ctx.session.userData.city_id);
+      user.registered = true;
+      //also delete user orginally created
+      await this.em.nativeDelete(User, { chatId: String(ctx.from.id) });
+    }
+    await this.em.persistAndFlush(user);
   }
   async getUser(ctx: BotContext) {
     let user = await this.em.findOne(User, { chatId: String(ctx.from.id) });

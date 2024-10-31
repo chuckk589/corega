@@ -10,6 +10,7 @@ import { User } from '../mikroorm/entities/User';
 import { RetrieveCheckDto } from './dto/retrieve-check.dto';
 import { UpdateCheckDto } from './dto/update-check.dto';
 import { LOCALES } from '../bot/common/constants';
+import { CreateCheckDto } from './dto/create-check.dto';
 
 export type ImportedCheck = {
   timestamp: string;
@@ -28,7 +29,33 @@ export type ImportedCheck = {
 
 @Injectable()
 export class CheckService {
+  async remove(ids: number[]) {
+    const checks = await this.em.find(Check, { id: { $in: ids } });
+    checks.map((check) => this.em.remove(check));
+    await this.em.flush();
+    return checks.map((check) => check.id);
+  }
   constructor(private readonly em: EntityManager, @Inject(BOT_NAME) private bot: Bot<BotContext>) {}
+
+  async create(createCheckDto: CreateCheckDto) {
+    let existingUser = await this.em.findOne(User, { phone: createCheckDto.phone });
+    if (!existingUser) {
+      existingUser = this.em.create(User, { phone: createCheckDto.phone });
+    }
+    const check = this.em.create(Check, { user: existingUser, pinfl: createCheckDto.pinfl, cardNumber: createCheckDto.cardNumber, accountNumber: createCheckDto.accountNumber, checkPath: '', goodPath: '', idPath: '' });
+    await this.em.persistAndFlush(check);
+    return new RetrieveCheckDto(check);
+    // if (existingUser) {
+    //   const check = this.em.create(Check, { user: existingUser, pinfl: createCheckDto.pinfl, cardNumber: createCheckDto.cardNumber, accountNumber: createCheckDto.accountNumber });
+    //   await this.em.persistAndFlush(check);
+    //   return new RetrieveCheckDto(check);
+    // } else {
+    //   existingUser = this.em.create(User, { phone: createCheckDto.phone });
+    //   const check = this.em.create(Check, { user, pinfl: createCheckDto.pinfl, cardNumber: createCheckDto.cardNumber, accountNumber: createCheckDto.accountNumber });
+    //   await this.em.persistAndFlush(check);
+    //   return new RetrieveCheckDto(check);
+    // }
+  }
 
   async findAll(): Promise<RetrieveCheckDto[]> {
     return (await this.em.find(Check, {}, { populate: ['user', 'status.translation.values', 'status.comment.values'] })).map((check) => new RetrieveCheckDto(check));

@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, HttpException, HttpStatus, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, HttpException, HttpStatus, UploadedFiles, UseInterceptors, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CheckService } from './check.service';
 import { UpdateCheckDto } from './dto/update-check.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { CreateCheckDto } from './dto/create-check.dto';
 
 @Controller({
   path: 'check',
@@ -22,13 +23,13 @@ export class CheckController {
     return this.checkService.update(+id, updateCheckDto);
   }
 
-  // @Post('import')
-  // @UseInterceptors(FileFieldsInterceptor([{ name: 'checks' }]))
-  // async create(@UploadedFiles() files: { checks?: Express.Multer.File[] }) {
-  //   const { checks } = files;
-  //   if (!checks) {
-  //     throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
-  //   }
-  //   return await this.checkService.parseChecksFile(checks[0].buffer);
-  // }
+  @Post()
+  create(@Body() createCheckDto: CreateCheckDto) {
+    return this.checkService.create(createCheckDto);
+  }
+
+  @Delete()
+  remove(@Query('ids') ids: string) {
+    return this.checkService.remove(ids.split(',').map((id) => +id));
+  }
 }
