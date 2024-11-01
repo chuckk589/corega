@@ -65,26 +65,21 @@ export class globalService {
     const phone = ctx.session.userData.phone.replace(/\D/g, '');
     //check if theres user with same phone already and update it if so
     let user = await this.em.findOne(User, { phone });
+    //сценарии
+    //зарегался с сайта - phone not null chatid - null
     if (!user) {
-      user = this.em.create(User, {
-        chatId: String(ctx.from.id),
-        locale: ctx.session.userData.locale as Locale,
-        phone,
-        username: ctx.from.username,
-        credentials: ctx.session.userData.credentials,
-        city: this.em.getReference(City, ctx.session.userData.city_id),
-        registered: true,
-      });
+      //user not registered from site
+      //update existing
+      user = await this.em.findOneOrFail(User, { chatId: String(ctx.from.id) });
     } else {
-      user.chatId = String(ctx.from.id);
-      user.locale = ctx.session.userData.locale as Locale;
-      user.username = ctx.from.username;
-      user.credentials = ctx.session.userData.credentials;
-      user.city = this.em.getReference(City, ctx.session.userData.city_id);
-      user.registered = true;
-      //also delete user orginally created
       await this.em.nativeDelete(User, { chatId: String(ctx.from.id) });
     }
+    user.chatId = String(ctx.from.id);
+    user.locale = ctx.session.userData.locale as Locale;
+    user.username = ctx.from.username;
+    user.credentials = ctx.session.userData.credentials;
+    user.city = this.em.getReference(City, ctx.session.userData.city_id);
+    user.registered = true;
     await this.em.persistAndFlush(user);
   }
   async getUser(ctx: BotContext) {
