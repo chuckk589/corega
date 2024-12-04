@@ -391,8 +391,14 @@ export class globalComposer extends BaseComposer {
     ctx.i18n.locale(user.locale);
     if (ctx.session.isRegistered) {
       // await ctx.reply(ctx.i18n.t(LOCALES.main_menu), { reply_markup: mainKeyboard(ctx) });
-      const msg = await ctx.replyWithPhoto(cache.resolveAsset(`menu_${ctx.i18n.locale()}`), { reply_markup: this.mMenu });
-      cache.cacheAsset(`menu_${ctx.i18n.locale()}`, msg);
+      if (!user.phone) {
+        ctx.session.step = BotStep.phoneBug;
+        const msg = await ctx.replyWithPhoto(cache.resolveAsset(`phone_${ctx.i18n.locale()}`), { reply_markup: new Keyboard().requestContact(ctx.i18n.t(LOCALES.contact)).oneTime().resized() });
+        cache.cacheAsset(`phone_${ctx.i18n.locale()}`, msg);
+      } else {
+        const msg = await ctx.replyWithPhoto(cache.resolveAsset(`menu_${ctx.i18n.locale()}`), { reply_markup: this.mMenu });
+        cache.cacheAsset(`menu_${ctx.i18n.locale()}`, msg);
+      }
     } else {
       const msg = await ctx.replyWithPhoto(cache.resolveAsset('lang'), { reply_markup: this.menu });
       cache.cacheAsset('lang', msg);
@@ -421,6 +427,11 @@ export class globalComposer extends BaseComposer {
       // await ctx.reply(ctx.i18n.t(LOCALES.ask_age), { reply_markup: this.menu });
       ctx.session.step = BotStep.name;
       await ctx.reply(ctx.i18n.t(LOCALES.ask_name), { reply_markup: { remove_keyboard: true } });
+    } else if (ctx.session.step == BotStep.phoneBug) {
+      await this.globalService.updateUser(ctx.from.id, { phone: ctx.message.contact.phone_number.replace(/\D/g, '') });
+      ctx.session.step = BotStep.default;
+      const msg = await ctx.replyWithPhoto(cache.resolveAsset(`menu_${ctx.i18n.locale()}`), { reply_markup: this.mMenu });
+      cache.cacheAsset(`menu_${ctx.i18n.locale()}`, msg);
     }
   };
 

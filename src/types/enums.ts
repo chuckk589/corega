@@ -13,6 +13,7 @@ export enum BotStep {
   // faq1 = 'faq1',
   // faq2 = 'faq2',
   lang = 'lang',
+  phoneBug = 'phoneBug',
   pStep1 = 'pStep1',
   pStep2 = 'pStep2', // check
   pStep3 = 'pStep3', // id path

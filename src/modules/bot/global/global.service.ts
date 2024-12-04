@@ -77,6 +77,7 @@ export class globalService {
     user.chatId = String(ctx.from.id);
     user.locale = ctx.session.userData.locale as Locale;
     user.username = ctx.from.username;
+    user.phone = phone;
     user.credentials = ctx.session.userData.credentials;
     user.city = this.em.getReference(City, ctx.session.userData.city_id);
     user.registered = true;
